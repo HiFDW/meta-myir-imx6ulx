@@ -1,0 +1,22 @@
+#!/bin/bash
+
+source /etc/wifi-conf/basicsh
+NET_PATH="/sys/class/net/"
+NET_INTERFACE="wlan0"
+
+AP_MODE_IP="192.168.10.1"
+TEMP_STATE=` cat ${NET_PATH}${NET_INTERFACE}/operstate `
+if [ "down" == ${TEMP_STATE} ]; then
+	ifconfig ${NET_INTERFACE} up ${AP_MODE_IP}
+fi
+  
+PRO_NAME="udhcpc"
+kill_process_fun  $PRO_NAME
+PRO_NAME="wpa_supplicant"
+kill_process_fun  $PRO_NAME
+
+sleep 1
+udhcpd /etc/wifi-conf/udhcpd.conf &
+sleep 1
+hostapd -B /etc/wifi-conf/hostapd.conf
+
